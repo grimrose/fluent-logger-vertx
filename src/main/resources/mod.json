@@ -1,0 +1,16 @@
+{
+
+    "main": "org.grimrose.vertx.mods.FluentLoggerModule",
+    "worker": true,
+
+    "description": "Fluentd Logger Module for Vert.x",
+    "licenses": ["The Apache Software License Version 2.0"],
+    "author": "grimrose",
+
+    "developers": ["grimrose"],
+    "keywords": ["fluentd", "logger"],
+    "homepage": "https://github.com/grimrose/fluent-logger-vertx",
+
+    "auto-redeploy": true
+
+}
