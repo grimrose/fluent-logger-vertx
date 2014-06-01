@@ -16,6 +16,8 @@
 
 package org.grimrose.vertx.mods;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
@@ -41,7 +43,52 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
     static final String ADDRESS = FluentLoggerModuleIntegrationTest.class.getName();
 
-    FluentdStandalone fluentd;
+    private static FluentdStandalone fluentd;
+
+    private static int port;
+
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        // Setup
+        port = IOUtil.randomPort();
+        int initWait = 500;
+        int maxWait = 10000;
+
+        String workDir = null;
+        try {
+            workDir = Files.createTempDirectory("fluentd").toString();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+        String configuration = FluentdStandalone.defaultConfig();
+
+        FluentdConfig fluentdConfig = new FluentdConfig(port, null, initWait, maxWait, workDir, configuration);
+        fluentd = new FluentdStandalone(fluentdConfig);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        if (fluentd.startAndAwait() != 0) {
+            latch.countDown();
+        }
+        try {
+            latch.await(maxWait, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        // After
+        if (fluentd != null) {
+            fluentd.stop();
+        }
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
+        }
+    }
 
     @Test
     public void _string_message_sending() throws Exception {
@@ -52,7 +99,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         message.putString("tag", "test");
         message.putObject("data", new JsonObject().putString("hoge", "fuga"));
 
-        final CountDownLatch stopLatch = new CountDownLatch(1);
 
         // Exercise
         vertx.eventBus().send(ADDRESS, message, new Handler<Message<JsonObject>>() {
@@ -61,9 +107,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
                 // Verify
                 assertEquals("ok", reply.body().getString("status"));
-
-                stopLatch.countDown();
-                stopFluentd(stopLatch);
 
                 testComplete();
             }
@@ -83,7 +126,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         data.putArray("param", new JsonArray().addString("param1").addString("param2"));
         message.putObject("data", data);
 
-        final CountDownLatch stopLatch = new CountDownLatch(1);
 
         // Exercise
         vertx.eventBus().send(ADDRESS, message, new Handler<Message<JsonObject>>() {
@@ -93,9 +135,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
                 // Verify
                 assertEquals("ok", reply.body().getString("status"));
 
-                stopLatch.countDown();
-                stopFluentd(stopLatch);
-
                 testComplete();
             }
         });
@@ -104,32 +143,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
     @Override
     public void start() {
         initialize();
-
-        int port = IOUtil.randomPort();
-        String configFile = null;
-        int initWait = 500;
-        int maxWait = 10000;
-
-        String workDir = null;
-        try {
-            workDir = Files.createTempDirectory("fluentd").toString();
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-        String configuration = FluentdStandalone.defaultConfig();
-
-        FluentdConfig fluentdConfig = new FluentdConfig(port, configFile, initWait, maxWait, workDir, configuration);
-        fluentd = new FluentdStandalone(fluentdConfig);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        if (fluentd.startAndAwait() != 0) {
-            latch.countDown();
-        }
-        try {
-            latch.await(maxWait, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
 
         JsonObject config = new JsonObject();
         config.putString("address", ADDRESS);
@@ -148,19 +161,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
             }
         });
 
-    }
-
-
-    private void stopFluentd(CountDownLatch stopLatch) {
-        if (fluentd != null) {
-            fluentd.stop();
-        }
-        try {
-            TimeUnit.SECONDS.sleep(10);
-            stopLatch.await(60, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
     }
 
 }
