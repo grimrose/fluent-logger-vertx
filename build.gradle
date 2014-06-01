@@ -50,7 +50,6 @@ install - install any jars produced to the local Maven repository (.m2)
 
 dependencies {
     compile "org.fluentd:fluent-logger:$fluentLoggerVersion"
-    testCompile "org.xerial:fluentd-standalone:$fluentdStandaloneVersion"
 }
 
 test {
