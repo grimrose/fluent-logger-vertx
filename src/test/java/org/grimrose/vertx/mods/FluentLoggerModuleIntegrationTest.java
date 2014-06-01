@@ -52,6 +52,8 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         message.putString("tag", "test");
         message.putObject("data", new JsonObject().putString("hoge", "fuga"));
 
+        final CountDownLatch stopLatch = new CountDownLatch(1);
+
         // Exercise
         vertx.eventBus().send(ADDRESS, message, new Handler<Message<JsonObject>>() {
             @Override
@@ -59,6 +61,9 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
                 // Verify
                 assertEquals("ok", reply.body().getString("status"));
+
+                stopLatch.countDown();
+                stopFluentd(stopLatch);
 
                 testComplete();
             }
@@ -78,6 +83,8 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         data.putArray("param", new JsonArray().addString("param1").addString("param2"));
         message.putObject("data", data);
 
+        final CountDownLatch stopLatch = new CountDownLatch(1);
+
         // Exercise
         vertx.eventBus().send(ADDRESS, message, new Handler<Message<JsonObject>>() {
             @Override
@@ -85,6 +92,9 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
                 // Verify
                 assertEquals("ok", reply.body().getString("status"));
+
+                stopLatch.countDown();
+                stopFluentd(stopLatch);
 
                 testComplete();
             }
@@ -107,16 +117,14 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
             fail(e.getMessage());
         }
         String configuration = FluentdStandalone.defaultConfig();
-        final CountDownLatch latch = new CountDownLatch(1);
 
         FluentdConfig fluentdConfig = new FluentdConfig(port, configFile, initWait, maxWait, workDir, configuration);
-
         fluentd = new FluentdStandalone(fluentdConfig);
 
-        fluentd.startAndAwait();
-
-        latch.countDown();
-
+        CountDownLatch latch = new CountDownLatch(1);
+        if (fluentd.startAndAwait() != 0) {
+            latch.countDown();
+        }
         try {
             latch.await(maxWait, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -142,11 +150,16 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
     }
 
-    @Override
-    public void stop() {
-        super.stop();
+
+    private void stopFluentd(CountDownLatch stopLatch) {
         if (fluentd != null) {
             fluentd.stop();
+        }
+        try {
+            TimeUnit.SECONDS.sleep(10);
+            stopLatch.await(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
         }
     }
 
