@@ -1,0 +1,9 @@
+language: java
+
+jdk:
+  - openjdk7
+  - oraclejdk7
+
+before_install: gem install fluentd --no-ri --no-rdoc
+
+before_script: fluentd -c .fluent.conf
