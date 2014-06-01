@@ -24,6 +24,7 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
+import xerial.core.io.IOUtil;
 import xerial.fluentd.FluentdConfig;
 import xerial.fluentd.FluentdStandalone;
 
@@ -94,10 +95,8 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
     public void start() {
         initialize();
 
-        Path path = Paths.get(System.getProperty("user.dir"), ".fluentd.conf");
-
-        int port = 24224;
-        String configFile = path.toString();
+        int port = IOUtil.randomPort();
+        String configFile = null;
         int initWait = 500;
         int maxWait = 10000;
 
@@ -127,6 +126,7 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         JsonObject config = new JsonObject();
         config.putString("address", ADDRESS);
         config.putString("tagPrefix", "debug");
+        config.putNumber("port", port);
 
         container.deployModule(System.getProperty("vertx.modulename"), config, new AsyncResultHandler<String>() {
             @Override
