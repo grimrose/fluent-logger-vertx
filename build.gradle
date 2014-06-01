@@ -90,3 +90,46 @@ def configurePom(def pom) {
         }
     }
 }
+
+// fluentd management for testing
+buildscript {
+    repositories {
+        mavenCentral();
+    }
+    dependencies {
+        classpath "org.xerial:fluentd-standalone:0.1.2"
+    }
+}
+
+import java.nio.file.Files
+import java.util.concurrent.*
+
+import xerial.fluentd.FluentdConfig
+import xerial.fluentd.FluentdStandalone
+
+def fluentd
+
+task startFluentd << {
+    int port = 24224
+    int initWait = 500
+    int maxWait = 10000
+
+    String workDir = Files.createTempDirectory("fluentd").toString()
+    String configuration = FluentdStandalone.defaultConfig();
+
+    def config = new FluentdConfig(port, null, initWait, maxWait, workDir, configuration);
+    fluentd = new FluentdStandalone(config);
+
+    CountDownLatch latch = new CountDownLatch(1);
+    if (fluentd.startAndAwait() != 0) {
+        latch.countDown();
+    }
+    latch.await(maxWait, TimeUnit.SECONDS);
+}
+
+task stopFluentd << {
+    fluentd.stop()
+}
+
+test.dependsOn startFluentd
+test.finalizedBy stopFluentd

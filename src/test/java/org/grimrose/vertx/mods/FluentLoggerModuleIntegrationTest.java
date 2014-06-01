@@ -40,6 +40,7 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         message.putString("tag", "test");
         message.putObject("data", new JsonObject().putString("hoge", "fuga"));
 
+
         // Exercise
         vertx.eventBus().send(ADDRESS, message, new Handler<Message<JsonObject>>() {
             @Override
@@ -65,6 +66,7 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         data.putString("domain", "cart");
         data.putArray("param", new JsonArray().addString("param1").addString("param2"));
         message.putObject("data", data);
+
 
         // Exercise
         vertx.eventBus().send(ADDRESS, message, new Handler<Message<JsonObject>>() {
