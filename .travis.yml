@@ -6,4 +6,6 @@ jdk:
 
 before_install: gem install fluentd --no-ri --no-rdoc
 
-before_script: fluentd -c .fluent.conf
+before_script: fluentd -c .fluentd.conf
+
+after_script: pkill -f fluentd
