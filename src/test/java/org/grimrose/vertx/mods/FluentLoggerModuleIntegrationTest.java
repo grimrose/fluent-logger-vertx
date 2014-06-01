@@ -16,8 +16,6 @@
 
 package org.grimrose.vertx.mods;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
@@ -26,69 +24,12 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
-import xerial.core.io.IOUtil;
-import xerial.fluentd.FluentdConfig;
-import xerial.fluentd.FluentdStandalone;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.vertx.testtools.VertxAssert.*;
 
 public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
     static final String ADDRESS = FluentLoggerModuleIntegrationTest.class.getName();
-
-    private static FluentdStandalone fluentd;
-
-    private static int port;
-
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        // Setup
-        port = IOUtil.randomPort();
-        int initWait = 500;
-        int maxWait = 10000;
-
-        String workDir = null;
-        try {
-            workDir = Files.createTempDirectory("fluentd").toString();
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-        String configuration = FluentdStandalone.defaultConfig();
-
-        FluentdConfig fluentdConfig = new FluentdConfig(port, null, initWait, maxWait, workDir, configuration);
-        fluentd = new FluentdStandalone(fluentdConfig);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        if (fluentd.startAndAwait() != 0) {
-            latch.countDown();
-        }
-        try {
-            latch.await(maxWait, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        // After
-        if (fluentd != null) {
-            fluentd.stop();
-        }
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
-    }
 
     @Test
     public void _string_message_sending() throws Exception {
@@ -147,7 +88,6 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
         JsonObject config = new JsonObject();
         config.putString("address", ADDRESS);
         config.putString("tagPrefix", "debug");
-        config.putNumber("port", port);
 
         container.deployModule(System.getProperty("vertx.modulename"), config, new AsyncResultHandler<String>() {
             @Override
