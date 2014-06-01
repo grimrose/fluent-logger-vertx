@@ -24,12 +24,23 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
+import xerial.fluentd.FluentdConfig;
+import xerial.fluentd.FluentdStandalone;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.vertx.testtools.VertxAssert.*;
 
 public class FluentLoggerModuleIntegrationTest extends TestVerticle {
 
     static final String ADDRESS = FluentLoggerModuleIntegrationTest.class.getName();
+
+    FluentdStandalone fluentd;
 
     @Test
     public void _string_message_sending() throws Exception {
@@ -83,6 +94,36 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
     public void start() {
         initialize();
 
+        Path path = Paths.get(System.getProperty("user.dir"), ".fluentd.conf");
+
+        int port = 24224;
+        String configFile = path.toString();
+        int initWait = 500;
+        int maxWait = 10000;
+
+        String workDir = null;
+        try {
+            workDir = Files.createTempDirectory("fluentd").toString();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+        String configuration = FluentdStandalone.defaultConfig();
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        FluentdConfig fluentdConfig = new FluentdConfig(port, configFile, initWait, maxWait, workDir, configuration);
+
+        fluentd = new FluentdStandalone(fluentdConfig);
+
+        fluentd.startAndAwait();
+
+        latch.countDown();
+
+        try {
+            latch.await(maxWait, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
+        }
+
         JsonObject config = new JsonObject();
         config.putString("address", ADDRESS);
         config.putString("tagPrefix", "debug");
@@ -99,6 +140,14 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
             }
         });
 
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        if (fluentd != null) {
+            fluentd.stop();
+        }
     }
 
 }
