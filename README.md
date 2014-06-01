@@ -1,6 +1,9 @@
 # Fluentd Logger Module for Vert.x
 
+[![Build Status](https://travis-ci.org/grimrose/fluent-logger-vertx.svg?branch=master)](https://travis-ci.org/grimrose/fluent-logger-vertx)
+
 This module is wrapper of [fluent / fluent-logger-java](https://github.com/fluent/fluent-logger-java) for [Vert.x](http://vertx.io).
+
 
 #### To use this module you must have a Fluentd instance running on your network.
 
