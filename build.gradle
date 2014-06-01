@@ -52,10 +52,6 @@ dependencies {
     compile "org.fluentd:fluent-logger:$fluentLoggerVersion"
 }
 
-test {
-
-}
-
 def configurePom(def pom) {
     pom.project {
         name rootProject.name
@@ -106,30 +102,34 @@ import java.util.concurrent.*
 
 import xerial.fluentd.FluentdConfig
 import xerial.fluentd.FluentdStandalone
+import xerial.core.io.IOUtil
 
+// fluentd standalone instance
 def fluentd
+def port = IOUtil.randomPort()
 
 task startFluentd << {
-    int port = 24224
-    int initWait = 500
-    int maxWait = 10000
-
     String workDir = Files.createTempDirectory("fluentd").toString()
-    String configuration = FluentdStandalone.defaultConfig();
+    String configuration = FluentdStandalone.defaultConfig()
 
-    def config = new FluentdConfig(port, null, initWait, maxWait, workDir, configuration);
-    fluentd = new FluentdStandalone(config);
+    def config = new FluentdConfig(port, null, 500, 10000, workDir, configuration)
+    fluentd = new FluentdStandalone(config)
 
-    CountDownLatch latch = new CountDownLatch(1);
+    def latch = new CountDownLatch(1)
     if (fluentd.startAndAwait() != 0) {
-        latch.countDown();
+        latch.countDown()
     }
-    latch.await(maxWait, TimeUnit.SECONDS);
+    latch.await 60, TimeUnit.SECONDS
 }
 
 task stopFluentd << {
     fluentd.stop()
+    TimeUnit.SECONDS.sleep 1
 }
 
 test.dependsOn startFluentd
 test.finalizedBy stopFluentd
+
+test {
+    systemProperty 'fluentd.port', "$port"
+}

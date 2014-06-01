@@ -85,9 +85,12 @@ public class FluentLoggerModuleIntegrationTest extends TestVerticle {
     public void start() {
         initialize();
 
+        int port = Integer.getInteger("fluentd.port", 24224);
+
         JsonObject config = new JsonObject();
         config.putString("address", ADDRESS);
         config.putString("tagPrefix", "debug");
+        config.putNumber("port", port);
 
         container.deployModule(System.getProperty("vertx.modulename"), config, new AsyncResultHandler<String>() {
             @Override
