@@ -8,4 +8,6 @@ before_install: gem install fluentd --no-ri --no-rdoc
 
 before_script: fluentd -c .fluentd.conf
 
+script: ./gradlew test
+
 after_script: pkill -f fluentd
