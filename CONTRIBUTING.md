@@ -1,44 +1,59 @@
-# Guide to contributing
+## Contributing
+Thanks! There are plenty of ways you can help!  
 
-Please read this if you intend to contribute to the project.
+### Report issues
+Check project and report your issue [here](https://github.com/grimrose/fluent-logger-vertx/issues)
 
-## First things
+1. **Report your Idea**  
+  If you have a any idea about design, programming, technology and other, please open an issue.
 
-* Get a github account if you don't have one already
-* Submit a github issue if there isn't one already.
-  * Clearly describe the bug or feature
-  * Provide exact reproducable steps to reproduce the issue if its a bug
-  * Include the versions of all components
-* Fork the repository on github
+1. **Ask any question**  
+  You can ask any question about this projects and codes
 
-## Making your changes
+1. **Bug report**  
+  Please try to be as detailed as possible in your report. What is your
+environment? What steps will reproduce the issue? What would you expect to be the outcome? All these
+details will help people to assess and fix any potential bugs.
 
-* Create a new branch for your changes
-* Make your changes
-* Make sure you include tests
-* Make sure the test suite passes after your changes
-* Commit your changes into that branch
-* Use descriptive and meaningful commit messages
-* If you have a lot of commits squash them into a single commit
-* Push your changes to your branch in your forked repository
+### Pull requests  
 
-## Submitting the changes
+Good pull requests — patches, improvements, new features — are a fantastic
+help. They should remain focused in scope and avoid containing unrelated commits.
 
-Before submitting your pull request you must sign the [Eclipse Foundation Contributor License Agreement](http://www.eclipse.org/legal/CLA.php).
+If your contribution involves a significant amount of work or substantial
+changes to any part of the project, please open an issue to discuss it first.
 
-We will NOT ACCEPT any contributions without this first being signed.
+Please follow this process; it's the best way to get your work included in the project:
 
-To sign the Eclipse CLA you need to:
+1. [Fork](http://help.github.com/fork-a-repo/) the project.
 
-* Obtain an Eclipse Foundation userid. Anyone who currently uses Eclipse Bugzilla or Gerrit systems already has one of those.
-If you don’t, you need to [register](https://dev.eclipse.org/site_login/createaccount.php).
+2. Clone your fork (`git clone
+   https://github.com/<your-username>/fluent-logger-vertx.git`).
 
-* Login into the [projects portal](https://projects.eclipse.org/), select “My Account”, and then the “Contributor License Agreement” tab.
- 
-## After submitting
+3. Add an `upstream` remote (`git remote add upstream
+   https://github.com/grimrose/fluent-logger-vertx.git`).
 
-* Once you have signed the Eclipse CLA, make a note on the github issue that you have signed the CLA, and then you can submit a pull request via github.
-* Do not use your branch for any other development, otherwise further changes that you make will be visible in the PR.
+4. Get the latest changes from upstream (e.g. `git pull upstream
+   <dev-branch>`).
 
+5. Create a new topic branch to contain your feature, change, or fix (`git
+   checkout -b <topic-branch-name>`).
 
+6. Make sure that your changes adhere to the current coding conventions used
+   throughout the project - indentation, accurate comments, etc. Please update
+   any documentation that is relevant to the change you are making.
 
+7. Commit your changes in logical chunks; use git's [interactive
+   rebase](https://help.github.com/articles/interactive-rebase) feature to tidy
+   up your commits before making them public. Please adhere to these [git commit
+   message
+   guidelines](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
+   or your pull request is unlikely be merged into the main project.
+
+8. Locally merge (or rebase) the upstream branch into your topic branch.
+
+9. Push your topic branch up to your fork (`git push origin
+   <topic-branch-name>`).
+
+10. [Open a Pull Request](http://help.github.com/send-pull-requests/) with a
+    clear title and description. Please mention which browsers you tested in.
